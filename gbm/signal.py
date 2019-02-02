@@ -17,3 +17,12 @@ def cluster_detectors(counts, num_detectors=4):
     st = counts[-num_detectors:,:]
     return numpy.sum(st, axis=0)
 
+def trigger_integrate(times, counts, threshold, window, minimum):
+    peaks = numpy.where(counts > threshold)[0]
+    wbins = int(window / (times[1] - times[0]))
+    stats = []
+    for p in peaks:
+        s = counts[p-wbins:p+wbins]
+        stat = s[s>minimum].sum()
+        stats.append(stat)
+    return times[peaks], numpy.array(stats)
