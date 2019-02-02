@@ -45,7 +45,7 @@ def get_data(start_time, end_time, detector_num):
     times = []
     channels = []
     for fname in fnames:
-        if fname[0:5] == 'http':
+        if fname[0:4] == 'http':
             fname = download_file(fname, cache=True)
         f = fits.open(fname)
         time = f[2].data['TIME'] + TIME_OFFSET
