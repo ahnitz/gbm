@@ -9,3 +9,11 @@ def running_norm(times, counts, window):
     meansub =  counts[nbins:-nbins] - ave
     normed = meansub / meansub.std()
     return times[nbins:-nbins], normed
+
+def cluster_detectors(counts, num_detectors=4):
+    counts = numpy.array(counts)
+    counts = numpy.sort(counts, axis=0)
+
+    st = counts[-num_detectors:,:]
+    return numpy.sum(st, axis=0)
+
