@@ -1,5 +1,6 @@
 """ Utilities for processing GBM time series data
 """
+import numpy
 
 def running_norm(times, counts, window):
     nbins = int(window / (times[1] - times[0]))
@@ -23,6 +24,8 @@ def trigger_integrate(times, counts, threshold, window, minimum):
     stats = []
     for p in peaks:
         s = counts[p-wbins:p+wbins]
-        stat = s[s>minimum].sum()
+        l = numpy.where(s>minimum)[0]
+
+        stat = s[l[0]:l[-1]+1].sum()
         stats.append(stat)
     return times[peaks], numpy.array(stats)
