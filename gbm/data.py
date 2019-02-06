@@ -4,6 +4,7 @@ import os, numpy
 import astropy.io.fits as fits
 from astropy.utils.data import download_file
 from astropy.time import Time
+from urllib2 import HTTPError
 
 nfiles = 24
 TIME_OFFSET = 662342413
@@ -37,16 +38,26 @@ def get_paths_covering(start_time, end_time, detector_num):
         fnames.append(get_path(ftime.datetime.year, ftime.datetime.month,
                                ftime.datetime.day, ftime.datetime.hour,
                                detector_num))
+
         ftime = Time(ftime.gps + 3600, format='gps', scale='utc')
     return fnames
 
-def get_data(start_time, end_time, detector_num):
+def get_data(start_time, end_time, detector_num, fault_tolerant=False):
     fnames = get_paths_covering(start_time, end_time, detector_num)
-    times = []
-    channels = []
+    times = [[],]
+    channels = [[],]
     for fname in fnames:
+
         if fname[0:4] == 'http':
-            fname = download_file(fname, cache=True)
+            try:
+                fname = download_file(fname, cache=True)
+            except HTTPError as e:
+                if fault_tolerant:
+                    continue
+                else:
+                    raise e
+            
+
         f = fits.open(fname)
         time = f[2].data['TIME'] + TIME_OFFSET
         l = (time < end_time) & (time >= start_time)
@@ -62,8 +73,8 @@ def get_data(start_time, end_time, detector_num):
     return t, c
 
 def get_triggers(start_time, end_time, detector_num,
-                 energy=(CHANNELS.min(), CHANNELS.max())):
-    times, channels = get_data(start_time, end_time, detector_num)
+                 energy=(CHANNELS.min(), CHANNELS.max()), fault_tolerant=False):
+    times, channels = get_data(start_time, end_time, detector_num, fault_tolerant=fault_tolerant)
 
     l = numpy.searchsorted(CHANNELS, energy[0]) - 1
     r = numpy.searchsorted(CHANNELS, energy[1])
@@ -72,9 +83,9 @@ def get_triggers(start_time, end_time, detector_num,
     return times[keep]
 
 def get_binned_triggers(start_time, end_time, detector_num, delta_t,
-                        energy=(CHANNELS.min(), CHANNELS.max())):
+                        energy=(CHANNELS.min(), CHANNELS.max()), fault_tolerant=False):
     times = get_triggers(start_time, end_time, detector_num,
-                         energy=energy)
+                         energy=energy, fault_tolerant=fault_tolerant)
     bin_edges = numpy.arange(start_time, end_time, delta_t)
 
     left = numpy.searchsorted(times, bin_edges)
