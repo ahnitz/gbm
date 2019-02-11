@@ -3,7 +3,12 @@
 import numpy
 
 def running_norm(times, counts, window):
-    nbins = int(window / (times[1] - times[0]))
+    t = times.copy()
+    t.sort()
+
+    l = times - window
+    r = times + window
+
     csum = counts.cumsum()
     ave = (csum[nbins*2:] - csum[:-nbins*2]) / (nbins * 2.0)
 
@@ -18,14 +23,14 @@ def cluster_detectors(counts, num_detectors=4):
     st = counts[-num_detectors:,:]
     return numpy.sum(st, axis=0)
 
-def trigger_integrate(times, counts, threshold, window, minimum):
+def trigger_integrate(times, counts, threshold, window):
     peaks = numpy.where(counts > threshold)[0]
     wbins = int(window / (times[1] - times[0]))
     stats = []
     for p in peaks:
-        s = counts[p-wbins:p+wbins]
-        l = numpy.where(s>minimum)[0]
-
-        stat = s[l[0]:l[-1]+1].sum()
+        l = p-wbins if p-wbins >=0 else 0
+        r = p+wbins if p+wbins <=len(counts) else len(counts)
+        s = counts[l:r]
+        stat = s.sum()
         stats.append(stat)
     return times[peaks], numpy.array(stats)
