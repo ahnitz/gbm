@@ -13,15 +13,22 @@ PATHS = ['/atlas/recent/fermi/gbm/daily/',
 
 pattern = "20{0:02d}/{1:02d}/{2:02d}/current/glg_poshist_all_{0:02d}{1:02d}{2:02d}_v00.fit"
 
+def _getposfile(dt):
+    for end in ['', '.gz']:
+        for path in PATHS:
+            for ver in ['v00', 'v01', 'v02']:
+                try:
+                    name = path + pattern.format(dt.year-2000, dt.month, dt.day)
+                    name = name.replace('v00', ver)
+                    name = name + end
+                    return fits.open(name)
+                except Exception as e:
+                    pass
+
+
 def xyzposition(time):
     dt = Time(time, format='gps', scale='utc').datetime
-    for path in PATHS:
-        try:
-            name = path + pattern.format(dt.year-2000, dt.month, dt.day)
-            d = fits.open(name)
-            break
-        except:
-            pass
+    d = _getposfile(dt)
 
     xv = d[1].data['POS_X']
     yv = d[1].data['POS_Y']
@@ -40,5 +47,4 @@ def earth_position(time):
     d, dec, ra = cartesian_to_spherical(x, y, z)
     return ra.value, dec.value
 
-print R_earth.value
 rearth_occlusion = numpy.arcsin(R_earth.value / (R_earth.value + ALTITUDE))
