@@ -24,7 +24,7 @@ def _getposfile(dt):
                     return fits.open(name)
                 except Exception as e:
                     pass
-
+    raise(e)
 
 def xyzposition(time):
     dt = Time(time, format='gps', scale='utc').datetime
