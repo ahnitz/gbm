@@ -5,6 +5,8 @@ from astropy.constants import R_earth
 from gbm import TIME_OFFSET
 import numpy
 
+# approximate fermi altitude
+ALTITUDE = 535000
 
 PATHS = ['/atlas/recent/fermi/gbm/daily/',
          'https://heasarc.gsfc.nasa.gov/FTP/fermi/data/gbm/daily/']
@@ -37,3 +39,6 @@ def earth_position(time):
     x, y, z = earth_xyzposition(time)
     d, dec, ra = cartesian_to_spherical(x, y, z)
     return ra.value, dec.value
+
+print R_earth.value
+rearth_occlusion = numpy.arcsin(R_earth.value / (R_earth.value + ALTITUDE))
