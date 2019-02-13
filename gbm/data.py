@@ -5,9 +5,9 @@ import astropy.io.fits as fits
 from astropy.utils.data import download_file
 from astropy.time import Time
 from urllib2 import HTTPError
+from gbm import TIME_OFFSET
 
 nfiles = 24
-TIME_OFFSET = 662342413
 
 PATHS = ['/home/ahnitz/projects/gwgrb/fermi/heasarc.gsfc.nasa.gov/FTP/fermi/data/gbm/daily/{}/{:02d}/{:02d}/current',
          '/atlas/recent/fermi/gbm/daily/{}/{:02d}/{:02d}/current',
@@ -56,7 +56,7 @@ def get_data(start_time, end_time, detector_num, fault_tolerant=False):
                     continue
                 else:
                     raise e
-            
+
 
         f = fits.open(fname)
         time = f[2].data['TIME'] + TIME_OFFSET
