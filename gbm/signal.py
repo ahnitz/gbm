@@ -43,7 +43,6 @@ def running_window(times, window):
     sl = numpy.searchsorted(t, l)
     sr = numpy.searchsorted(t, r)
     bins = sr - sl
-    print bins.min(), bins.max()
     return t, bins
 
 def running_norm(times, values, window, blind):
