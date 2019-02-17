@@ -34,3 +34,40 @@ def trigger_integrate(times, counts, threshold, window):
         stat = s.sum()
         stats.append(stat)
     return times[peaks], numpy.array(stats)
+
+def running_window(times, window):
+    t = times.copy()
+    t.sort()
+    l = t - window
+    r = t + window
+    sl = numpy.searchsorted(t, l)
+    sr = numpy.searchsorted(t, r)
+    bins = sr - sl
+    print bins.min(), bins.max()
+    return t, bins
+
+def running_norm(times, values, window, blind):
+    times = times.copy()
+    s = times.argsort()
+    times = times[s]
+    values = values[s]
+
+    sl = numpy.searchsorted(times, times-window)
+    sr = numpy.searchsorted(times, times+window) - 1
+
+    bsl = numpy.searchsorted(times, times-blind)
+    bsr = numpy.searchsorted(times, times+blind) - 1
+
+    csum = values.cumsum()
+    csum2 = (values**2.0).cumsum()
+
+    dx = (sr - sl).astype(numpy.float64)
+    dx -= (bsr - bsl).astype(numpy.float64)
+
+    mean = (csum[sr] - csum[sl] - (csum[bsr]- csum[bsl])) / dx
+    meansq = (csum2[sr] - csum2[sl] - (csum2[bsr] - csum2[bsl])) / dx
+
+    std = (meansq - mean**2.0)**0.5
+    values = (values - mean) / std
+    return times, values
+
