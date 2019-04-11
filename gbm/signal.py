@@ -45,7 +45,7 @@ def running_window(times, window):
     bins = sr - sl
     return t, bins
 
-def running_norm(times, values, window, blind):
+def running_norm(times, values, window, blind, return_all=True):
     times = times.copy()
     s = times.argsort()
     times = times[s]
@@ -68,4 +68,7 @@ def running_norm(times, values, window, blind):
 
     std = (meansq - mean**2.0)**0.5
     values = (values - mean) / std
-    return times, values, std, mean
+    if return_all:
+        return times, values, std, mean
+    else:
+        return times, values
