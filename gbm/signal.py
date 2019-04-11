@@ -68,5 +68,4 @@ def running_norm(times, values, window, blind):
 
     std = (meansq - mean**2.0)**0.5
     values = (values - mean) / std
-    return times, values
-
+    return times, values, std, mean
